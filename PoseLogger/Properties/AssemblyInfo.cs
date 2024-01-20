@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using MelonLoader;
 using PoseLogger; // The namespace of your mod class
 // ...
-[assembly: MelonInfo(typeof(PoseLoggerClass), "PoseLogger", "1.0.0", "Baumritter")]
+[assembly: MelonInfo(typeof(PoseLoggerClass), "PoseLogger", "1.0.2", "Baumritter")]
 [assembly: MelonGame("Buckethead Entertainment", "RUMBLE")]
 
 // General Information about an assembly is controlled through the following

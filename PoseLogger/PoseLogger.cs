@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using UnityEngine;
 using HarmonyLib;
 using PoseLogger;
@@ -16,14 +17,23 @@ namespace PoseLogger
 {
     public class PoseLoggerClass : MelonMod
     {
+        //constants
+        private const string SettingsFile = @"UserData\PoseLogger\Settings\Settings.txt";
+        private const string LogFilePath = @"UserData\PoseLogger\Logs\";
+        private const string LogFileName = "PoseLog";
+        private const string LogFileSuffix = ".txt";
+
         //variables
         private bool init = false;
         private bool logging = true;
+        private bool consolelog = false;
+        private bool filelog = false;
 
         private string PoseDataName = "";
         private string PoseName = "";
         private string currentScene = "";
         private string LogString = "";
+        private string LogFileString = "";
 
         private float CurrTimestamp = 0;
         private float LastTimestamp = 0;
@@ -33,14 +43,12 @@ namespace PoseLogger
         private PlayerPoseSystem Player_Obj;
 
         //initializes things
-        public override void OnInitializeMelon()
-        {
-            base.OnInitializeMelon();
-        }
-
         public override void OnLateInitializeMelon()
         {
             base.OnLateInitializeMelon();
+            LogFileString = LogFilePath + LogFileName + DateTime.Now.ToString("yyyyMMddHHmmss") + LogFileSuffix;
+            MelonLogger.Msg("LogFile: " + LogFileString);
+            GetSettings();
         }
 
         //Run every update
@@ -70,7 +78,6 @@ namespace PoseLogger
                     LogString = "Logging = " + logging.ToString();
                     MelonLogger.Msg(LogString);
                 }
-
 
                 //Only do in Gym / Park to avoid spam
                 if (logging && init && (currentScene == "Gym" || currentScene == "Park"))
@@ -144,14 +151,15 @@ namespace PoseLogger
 
                             //Place Buffer String after delay
                             if ((TimeDiff >= 1500 && PoseName != "Sprint") || (TimeDiff >= 3500 && PoseName == "Sprint"))
-                        {
-                            MelonLogger.Msg("-----------------------------------------------------");
-                        }
+                            {
+                                WriteToLogFile("-----------------------------------------------------");
+                            }
 
                             //Output
                             LogString = "Pose Name: " + PadString(PoseName, 10) + " | Time since last Pose:" + PadString((TimeDiff).ToString("0"), 6) + "ms";
-                            MelonLogger.Msg(LogString);
-                        }
+                            
+                            WriteToLogFile(LogString);  
+                    }
                         LastTimestamp = Player_Obj.lastPoseUsedTimestamp;
                     }
                     catch
@@ -181,6 +189,43 @@ namespace PoseLogger
             }
             return Input;
         }
+
+        public void WriteToLogFile(string Output)
+        {
+            if (consolelog)
+            {
+                MelonLogger.Msg(Output);
+            }
+            if (filelog)
+            {
+                Output = Output + Environment.NewLine;
+                File.AppendAllText(LogFileString, Output);
+            }
+        }
+
+        public void GetSettings()
+        {
+            if (System.IO.File.Exists(SettingsFile))
+            {
+                string[] fileContents = System.IO.File.ReadAllLines(SettingsFile);
+                if (fileContents[0].Contains("True"))
+                {
+                    consolelog = true;
+                }
+                if (fileContents[1].Contains("True"))
+                {
+                    filelog = true;
+                }
+                MelonLogger.Msg("Settings File applied");
+            }
+            else
+            {
+                consolelog = true;
+                filelog = true;
+                MelonLogger.Msg("Default Settings applied");
+            }
+        }
+
     }
 }
 
