@@ -1,2 +1,0 @@
-Write Log to Console = True
-Write Log to File = True

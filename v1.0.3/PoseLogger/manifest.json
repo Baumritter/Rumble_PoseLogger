@@ -1,9 +1,0 @@
-{
-  "name": "PoseLogger",
-  "version_number": "1.0.3",
-  "website_url": "",
-  "description": "Logs poses with the delay from the last pose",
-  "dependencies": [
-        "LavaGang-MelonLoader-0.5.7"
-  ]
-}
