@@ -1,28 +1,25 @@
 ﻿using MelonLoader;
 using RUMBLE.Players.Subsystems;
-using RUMBLE.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using UnityEngine;
-using HarmonyLib;
-using PoseLogger;
-using RUMBLE.Players;
-using RUMBLE.Poses;
 
 namespace PoseLogger
 {
     public class PoseLoggerClass : MelonMod
     {
+        //--------------------------------------------------
+        //--------------------------------------------------
         //constants
         private const string SettingsFile = @"UserData\PoseLogger\Settings\Settings.txt";
         private const string LogFilePath = @"UserData\PoseLogger\Logs\";
         private const string LogFileName = "PoseLog";
         private const string LogFileSuffix = ".txt";
+        //--------------------------------------------------
+        //--------------------------------------------------
 
+        //--------------------------------------------------
+        //--------------------------------------------------
         //variables
         private bool init = false;
         private bool logging = true;
@@ -38,9 +35,15 @@ namespace PoseLogger
         private float CurrTimestamp = 0;
         private float LastTimestamp = 0;
         private float TimeDiff = 0;
+        //--------------------------------------------------
+        //--------------------------------------------------
 
+        //--------------------------------------------------
+        //--------------------------------------------------
         //Objects
         private PlayerPoseSystem Player_Obj;
+        //--------------------------------------------------
+        //--------------------------------------------------
 
         //initializes things
         public override void OnLateInitializeMelon()
