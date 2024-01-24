@@ -12,7 +12,10 @@ namespace PoseLogger
         //--------------------------------------------------
         //constants
         private const string SettingsFile = @"UserData\PoseLogger\Settings\Settings.txt";
-        private const string LogFilePath = @"UserData\PoseLogger\Logs\";
+        private const string BaseFolder = "UserData";
+        private const string ModFolder = "PoseLogger";
+        private const string LogFolder = "Logs";
+        private const string SettingsFolder = "Settings";
         private const string LogFileName = "PoseLog";
         private const string LogFileSuffix = ".txt";
         //--------------------------------------------------
@@ -49,7 +52,10 @@ namespace PoseLogger
         public override void OnLateInitializeMelon()
         {
             base.OnLateInitializeMelon();
-            LogFileString = LogFilePath + LogFileName + DateTime.Now.ToString("yyyyMMddHHmmss") + LogFileSuffix;
+            CheckandCreateFolder(BaseFolder + @"\" + ModFolder);
+            CheckandCreateFolder(BaseFolder + @"\" + ModFolder + @"\" + LogFolder);
+            CheckandCreateFolder(BaseFolder + @"\" + ModFolder + @"\" + SettingsFolder);
+            LogFileString = BaseFolder + @"\" + ModFolder + @"\" + LogFolder + @"\" + LogFileName + DateTime.Now.ToString("yyyyMMddHHmmss") + LogFileSuffix;
             MelonLogger.Msg("LogFile: " + LogFileString);
             GetSettings();
         }
@@ -170,14 +176,9 @@ namespace PoseLogger
                     }
                 }
             }
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
-        {
-            base.OnSceneWasLoaded(buildIndex, sceneName);
-            init = false;
-            currentScene = sceneName;
-        }
 
-        public string PadString(string Input,int Length)
+        //Functions
+        public string PadString(string Input, int Length)
         {
             try
             {
@@ -223,11 +224,32 @@ namespace PoseLogger
             }
             else
             {
+                System.IO.File.AppendAllText(SettingsFile, "Write Log to Console = True" + Environment.NewLine);
+                System.IO.File.AppendAllText(SettingsFile, "Write Log to File = True");
                 consolelog = true;
                 filelog = true;
                 MelonLogger.Msg("Default Settings applied");
             }
         }
+
+        public void CheckandCreateFolder(string Input)
+        {
+            if (!Directory.Exists(Input))
+            {
+                Directory.CreateDirectory(Input);
+                MelonLogger.Msg("Folder: " + Input.ToString() + " created.");
+
+            }
+        }
+
+        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+        {
+            base.OnSceneWasLoaded(buildIndex, sceneName);
+            init = false;
+            currentScene = sceneName;
+        }
+
+
 
     }
 }
