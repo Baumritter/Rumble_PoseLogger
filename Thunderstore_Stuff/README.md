@@ -1,3 +1,9 @@
+## Installation Instructions
+1. Install MelonLoader
+2. Run Game
+3. Drop Mods Folder in to Rumble Source Directory
+4. Run the Game and enjoy the mod
+
 ## Overview
 The Mod tracks what poses are being done by the player and writes that info into the console/a file.
 Additionally the time between the latest and current pose is being tracked as to give info on the execution speed of the player.
