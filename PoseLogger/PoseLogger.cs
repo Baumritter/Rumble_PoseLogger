@@ -80,7 +80,7 @@ namespace PoseLogger
 
                 }
 
-                //Enable/Disable Logging to avoid spam
+                //Enable/Disable Logging to avoid spam (Key is "L")
                 if (Input.GetKeyDown(KeyCode.L))
                 {
                     logging = !logging;

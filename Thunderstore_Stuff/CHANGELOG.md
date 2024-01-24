@@ -1,3 +1,6 @@
+# Version 1.0.5
+- If Folders are missing then they will be created now.
+- If the settings file is missing it will be created now.
 # Version 1.0.4
 - Cleaned up the code a bit (no changes in function)
 # Version 1.0.3
