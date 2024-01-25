@@ -1,3 +1,6 @@
+# Version 1.1.0
+- Added Structure Tracking
+- Added various settings
 # Version 1.0.5
 - If Folders are missing then they will be created now.
 - If the settings file is missing it will be created now.

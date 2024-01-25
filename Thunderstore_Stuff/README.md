@@ -16,6 +16,7 @@ Additionally the time between the latest and current pose is being tracked as to
 
 ## Known Issues
 - The delay tracking of repeated Sprint Poses is inaccurate.
+- The Pose tracking will only track the host of the park
 
 ## Help And Other Resources
 Get help and find other resources in the Modding Discord:
