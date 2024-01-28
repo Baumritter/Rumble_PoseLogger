@@ -8,11 +8,14 @@
 The Mod tracks what poses are being done by the player and writes that info into the console/a file.
 Additionally the time between the latest and current pose is being tracked as to give info on the execution speed of the player.
 
-## Controls and Other Functions
+## Controls and Functions for File/Console Logging
 - The Logging can be turned Off/On (Default is ON) using the "L" key with the main window of the game selected.
 - The Logging does only work in the park and in the gym (main hub).
 - After 1500ms of no pose the logging will produce a spacer to make readability better.
 - Console/File Logging can be enabled/disabled via the Settings File in "Userdata\PoseLogger\Settings\Setting.txt".
+## Functions of OnScreenLogging
+- The Logging UI will automatically hide itself if not in Gym or park
+- After 1500ms of inactivity the lines will reset itself on next input
 
 ## Known Issues
 - The delay tracking of repeated Sprint Poses is inaccurate.
