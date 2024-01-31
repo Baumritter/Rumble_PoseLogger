@@ -1,17 +1,14 @@
 ﻿using MelonLoader;
+using RUMBLE.Managers;
 using RUMBLE.MoveSystem;
 using RUMBLE.Players.Subsystems;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
+using System.Linq;
 using TMPro;
-using RUMBLE.Managers;
+using UnityEngine;
 using UnityEngine.UI;
-using RUMBLE.Players;
-using RootMotion.Dynamics;
-using static UnityEngine.ExpressionEvaluator;
 
 namespace PoseLogger
 {
@@ -34,6 +31,7 @@ namespace PoseLogger
         private const int CubePool = 50;
         private const int WallPool = 49;
 
+        private const string Version = "Poselogger_v1.3.0";
         private const string SettingsFile = @"UserData\PoseLogger\Settings\Settings.txt";
         private const string BaseFolder = "UserData";
         private const string ModFolder = "PoseLogger";
@@ -42,32 +40,34 @@ namespace PoseLogger
         private const string PoseLogFileName = "PoseLog";
         private const string StructLogFileName = "StructLog";
         private const string LogFileSuffix = ".txt";
+
         //--------------------------------------------------
         //--------------------------------------------------
 
         //--------------------------------------------------
         //--------------------------------------------------
         //variables
-        private bool init = false;
-        private readonly bool debug = false;
+        private Vector3 Howard_BoardMainPosition = new Vector3(-2.615f, -3.52f, -19.05f);
+        private Vector3 Howard_BoardMainRotation = new Vector3(0, 250, 0);
+        private Vector3 Training_BoardMainPosition = new Vector3(-42.0299f, 3.194f, -1.0598f);
+        private Vector3 Training_BoardMainRotation = new Vector3(0, 250, 0);
+        private Vector3 Park_BoardMainPosition = new Vector3(-5.9f, -5.9f, -10f);
+        private Vector3 Park_BoardMainRotation = new Vector3(0, 196, 0);
+
+
+        private bool debuglogging = false;
+
+        private bool SceneInit = false;
         private bool logging = true;
         private bool buffer = false;
         private bool PoseStructureLink = false;
         private bool Combo = false;
         private bool BasePoseReset = false;
 
-        private bool structconsole = false;
-        private bool structfile = false;
-        private bool poseconsole = false;
         private bool posefile = false;
-        private bool streamermode = false;
-
-        private bool discenb = false;
-        private bool ballenb = false;
-        private bool pillenb = false;
-        private bool cubeenb = false;
-        private bool wallenb = false;
-        private bool lgrkenb = false;
+        private bool structurefile = false;
+        private bool onscreenlog = false;
+        private bool onboardlog = false;
 
         private string PoseDataName = "";
         private string PoseName = "";
@@ -77,7 +77,6 @@ namespace PoseLogger
         private string StructLogFileString = "";
         private string LocalPlayerName = "";
         private string LastStructure = "";
-
 
         private float CurrTimestamp = 0;
         private float LastTimestamp = 0;
@@ -108,6 +107,9 @@ namespace PoseLogger
         private ProcessableComponent[] Cubes;
         private ProcessableComponent[] Walls;
         private ProcessableComponent[] LgRck;
+        private GameObject Board_Howard;
+        private GameObject Board_Training;
+        private GameObject Board_Template;
         //--------------------------------------------------
         //--------------------------------------------------
 
@@ -123,14 +125,15 @@ namespace PoseLogger
             //Get Paths
             PoseLogFileString = BaseFolder + @"\" + ModFolder + @"\" + LogFolder + @"\" + PoseLogFileName + DateTime.Now.ToString("yyyyMMddHHmmss") + LogFileSuffix;
             StructLogFileString = BaseFolder + @"\" + ModFolder + @"\" + LogFolder + @"\" + StructLogFileName + DateTime.Now.ToString("yyyyMMddHHmmss") + LogFileSuffix;
-            MelonLogger.Msg("PoseLogFile: " + PoseLogFileString);
-            MelonLogger.Msg("PoseLogFile: " + StructLogFileString);
+            if (debuglogging) MelonLogger.Msg("PoseLogFile: " + PoseLogFileString);
+            if (debuglogging) MelonLogger.Msg("PoseLogFile: " + StructLogFileString);
 
             //Get and apply settings
-            GetSettings();                        
+            GetSettings();    
+            
+            ClearLogFolder();
             
         }
-
         //Run every update
         public override void OnUpdate()
         {
@@ -138,7 +141,7 @@ namespace PoseLogger
             base.OnUpdate();
 
             //Init once in actual scene to avoid spam
-            if ((currentScene == "Gym" || currentScene == "Park") && !init)
+            if ((currentScene == "Gym" || currentScene == "Park") && !SceneInit)
             {
 
                 try
@@ -147,55 +150,79 @@ namespace PoseLogger
                     LocalPlayerName = SanitizeName(GameObject.Find("Game Instance/Initializable/PlayerManager").GetComponent<PlayerManager>().LocalPlayer.Data.GeneralData.PublicUsername);
 
                     //For Pose Tracking
-                    if(poseconsole || posefile || streamermode)
-                    {
-                        Player_Obj = GameObject.Find("Game Instance/Initializable/PlayerManager").GetComponent<PlayerManager>().LocalPlayer.Controller.gameObject.transform.FindChild("Poses").GetComponent<PlayerPoseSystem>();
-
-                        if (debug) MelonLogger.Msg("Player Object found.");
-                    }
+                    if (Player_Obj == null) Player_Obj = GameObject.Find("Game Instance/Initializable/PlayerManager").GetComponent<PlayerManager>().LocalPlayer.Controller.gameObject.transform.FindChild("Poses").GetComponent<PlayerPoseSystem>();
+                    if (debuglogging) MelonLogger.Msg("Player Object found.");
 
                     //For Structure Tracking
-                    if (structconsole || structfile || streamermode)
-                    {
-                        PoolManager = GameObject.Find("Game Instance/Pre-Initializable/PoolManager");
-                        if (debug) MelonLogger.Msg("PoolManager found.");
+                    if (PoolManager == null) PoolManager = GameObject.Find("Game Instance/Pre-Initializable/PoolManager");
+                    if (debuglogging) MelonLogger.Msg("PoolManager found.");
 
-                        //Get all Structure Pool Objects
-                        if (discenb) Discs = PoolManager.transform.GetChild(DiscPool).GetComponentsInChildren<ProcessableComponent>(true);
-                        if (ballenb) Balls = PoolManager.transform.GetChild(BallPool).GetComponentsInChildren<ProcessableComponent>(true);
-                        if (pillenb) Pills = PoolManager.transform.GetChild(PillPool).GetComponentsInChildren<ProcessableComponent>(true);
-                        if (cubeenb) Cubes = PoolManager.transform.GetChild(CubePool).GetComponentsInChildren<ProcessableComponent>(true);
-                        if (wallenb) Walls = PoolManager.transform.GetChild(WallPool).GetComponentsInChildren<ProcessableComponent>(true);
-                        if (lgrkenb) LgRck = PoolManager.transform.GetChild(LgRkPool).GetComponentsInChildren<ProcessableComponent>(true);
+                    //Get all Structure Pool Objects
+                    if (Discs == null) Discs = PoolManager.transform.GetChild(DiscPool).GetComponentsInChildren<ProcessableComponent>(true);
+                    if (Balls == null) Balls = PoolManager.transform.GetChild(BallPool).GetComponentsInChildren<ProcessableComponent>(true);
+                    if (Pills == null) Pills = PoolManager.transform.GetChild(PillPool).GetComponentsInChildren<ProcessableComponent>(true);
+                    if (Cubes == null) Cubes = PoolManager.transform.GetChild(CubePool).GetComponentsInChildren<ProcessableComponent>(true);
+                    if (Walls == null) Walls = PoolManager.transform.GetChild(WallPool).GetComponentsInChildren<ProcessableComponent>(true);
+                    if (LgRck == null) LgRck = PoolManager.transform.GetChild(LgRkPool).GetComponentsInChildren<ProcessableComponent>(true);
 
-                    }
-                    //OnScreenTracking
-                    if(streamermode)
+                    //OnScreenLogging
+                    if(onscreenlog)
                     {
-                        try
-                        {
-                            if (!buffer)
-                            {
-                                CreateTrackingBuffer();
-                                BufferList.Add("Pose/Structure Tracker");
-                                BufferList2.Add("Time since last");
-                            }
-                            for (int i = 0; i < TBChildren.Length; i++)
-                            {
-                                WriteToBufferList("",BufferList);
-                                WriteToBufferList("",BufferList2);
-                            }
-                            TrackingBuffer.SetActive(true);
-                            AddToBuffer(BufferList, 0, 19);
-                            AddToBuffer(BufferList2, 20, 39);
-                        }
-                        catch
-                        {
-                        }
+                        if (!buffer) CreateTrackingBuffer();
                     }
 
-                    init = true;
-                    if (debug) MelonLogger.Msg(init);
+                    //OnBoardLogging
+                    if (onboardlog && (Board_Howard == null || Board_Training == null))
+                    {
+                        if (currentScene == "Gym")
+                        {
+                            Board_Howard = SpawnLeaderBoard("Gym_Howard_Board", Howard_BoardMainPosition, Howard_BoardMainRotation, debuglogging);
+                            Board_Training = SpawnLeaderBoard("Gym_Training_Board", Training_BoardMainPosition, Training_BoardMainRotation, debuglogging);
+                            if(Board_Template == null)
+                            {
+                                Board_Template = SpawnLeaderBoard("Park_Training_Board", Park_BoardMainPosition, Park_BoardMainRotation, debuglogging);
+                                Board_Template.SetActive(false);
+                                GameObject.DontDestroyOnLoad(Board_Template);
+                            }
+                        }
+                        if (currentScene == "Park")
+                        {
+                            Board_Training = GameObject.Instantiate(Board_Template);
+                            Board_Training.name = "Park_Training_Board";
+                            Board_Training.SetActive(true);
+                        }
+                    }
+
+                    //Buffer
+                    BufferList.Add("Pose/Structure Tracker");
+                    BufferList2.Add("Time since last");
+                    if (debuglogging) MelonLogger.Msg("Text added to Buffer.");
+
+                    for (int i = 0; i < TBChildren.Length; i++)
+                    {
+                        WriteToBufferList("", BufferList);
+                        WriteToBufferList("", BufferList2);
+                    }
+                    if (debuglogging) MelonLogger.Msg("Buffer filled.");
+
+                    if (onscreenlog && buffer)
+                    {
+                        TrackingBuffer.SetActive(true);
+                        if (debuglogging) MelonLogger.Msg("OnScreenLog visibility enabled.");
+                    }
+
+                    if (onscreenlog)
+                    {
+                        AddToBuffer(BufferList, 0, 19);
+                        AddToBuffer(BufferList2, 20, 39);
+                        if (debuglogging) MelonLogger.Msg("Buffer pushed to OnScreenLog");
+                    }
+
+                    if (onboardlog) UpdateBoard();
+                    if (debuglogging) MelonLogger.Msg("Buffer pushed to Board");
+
+                    SceneInit = true;
+                    if (debuglogging) MelonLogger.Msg(SceneInit);
                 }
                 catch
                 {
@@ -203,8 +230,8 @@ namespace PoseLogger
 
             }
 
-            if((currentScene != "Gym" || currentScene != "Park") && streamermode && buffer) { TrackingBuffer.SetActive(false); }
-            if ((currentScene == "Gym" || currentScene == "Park") && streamermode && buffer) { TrackingBuffer.SetActive(true); }
+            if((currentScene != "Gym" || currentScene != "Park") && onscreenlog && buffer) { TrackingBuffer.SetActive(false); }
+            if ((currentScene == "Gym" || currentScene == "Park") && onscreenlog && buffer) { TrackingBuffer.SetActive(true); }
 
 
 
@@ -217,26 +244,19 @@ namespace PoseLogger
                 }
 
             //Only do in Gym / Park to avoid spam
-            if (logging && init && (currentScene == "Gym" || currentScene == "Park"))
+            if (logging && SceneInit && (currentScene == "Gym" || currentScene == "Park"))
             {                
                 
                 //Pose based logging
-                if (poseconsole || posefile || streamermode)
-                {
-                    PoseLogging();
-                }
+                PoseLogging();
 
                 //Structure based logging
-                if (structconsole || structfile || streamermode)
-                {
-                    if (discenb) StructureLogging(Discs);
-                    if (ballenb) StructureLogging(Balls);
-                    if (pillenb) StructureLogging(Pills);
-                    if (cubeenb) StructureLogging(Cubes);
-                    if (wallenb) StructureLogging(Walls);
-                    if (lgrkenb) StructureLogging(LgRck);
-                }
-
+                StructureLogging(Discs);
+                StructureLogging(Balls);
+                StructureLogging(Pills);
+                StructureLogging(Cubes);
+                StructureLogging(Walls);
+                StructureLogging(LgRck);
 
                 PoseStructureLink = false;
             }
@@ -305,98 +325,70 @@ namespace PoseLogger
         //Settings and File Manipulation
         public void GetSettings()
         {
+            string SettingsString = (
+                    Version + Environment.NewLine +
+                    "<Logging Types>" + Environment.NewLine +
+                    "<File Logging>" + Environment.NewLine +
+                    "Enable Pose Log : True" + Environment.NewLine +
+                    "Enable Structure Log: True" + Environment.NewLine +
+                    "<OnScreenLog>" + Environment.NewLine +
+                    "Enable: True" + Environment.NewLine +
+                    "<BoardLog>" + Environment.NewLine +
+                    "Enable: True"
+                    );
+
             if (System.IO.File.Exists(SettingsFile))
             {
                 string[] fileContents = System.IO.File.ReadAllLines(SettingsFile);
-                //PoseSettings
-                if (fileContents[1].Contains("True"))
+
+                if (fileContents[0].Contains(Version))
                 {
+                    if (fileContents[3].Contains("True"))
+                    {
+                        posefile = true;
+                    }
+                    if (fileContents[4].Contains("True"))
+                    {
+                        structurefile = true;
+                    }
+                    if (fileContents[6].Contains("True"))
+                    {
+                        onscreenlog = true;
+                    }
+                    if (fileContents[8].Contains("True"))
+                    {
+                        onboardlog = true;
+                    }
+                    MelonLogger.Msg("Settings File applied");
+                }
+                else
+                {
+                    File.WriteAllText(SettingsFile, SettingsString);
                     posefile = true;
+                    structurefile = true;
+                    onscreenlog = true;
+                    onboardlog = true;
+                    MelonLogger.Msg("Default Settings applied");
                 }
-                if (fileContents[2].Contains("True"))
-                {
-                    poseconsole = true;
-                }
-                //StructSetttings
-                if (fileContents[4].Contains("True"))
-                {
-                    structfile = true;
-                }
-                if (fileContents[5].Contains("True"))
-                {
-                    structconsole = true;
-                }
-                //Toggles
-                if (fileContents[7].Contains("True"))
-                {
-                    discenb = true;
-                }
-                if (fileContents[8].Contains("True"))
-                {
-                    ballenb = true;
-                }
-                if (fileContents[9].Contains("True"))
-                {
-                    pillenb = true;
-                }
-                if (fileContents[10].Contains("True"))
-                {
-                    cubeenb = true;
-                }
-                if (fileContents[11].Contains("True"))
-                {
-                    wallenb = true;
-                }
-                if (fileContents[12].Contains("True"))
-                {
-                    lgrkenb = true;
-                }
-                if (fileContents[14].Contains("True"))
-                {
-                    streamermode = true;
-                }
-                MelonLogger.Msg("Settings File applied");
+
             }
             else
             {
-                string SettingsString = (
-                    "<Pose Based Logging>" + Environment.NewLine +
-                    "Write Pose Log to File: True" + Environment.NewLine +
-                    "Write Pose Log to Console: False" + Environment.NewLine +
-                    "<Structure Based Logging>" + Environment.NewLine +
-                    "Write Structure Log to File: True" + Environment.NewLine +
-                    "Write Structure Log to Console: True" + Environment.NewLine +
-                    "<Toggle Structures>" + Environment.NewLine +
-                    "Disc Tracked: True" + Environment.NewLine +
-                    "Ball Tracked: True" + Environment.NewLine +
-                    "Pillar Tracked: True" + Environment.NewLine +
-                    "Cube Tracked: True" + Environment.NewLine +
-                    "Wall Tracked: True" + Environment.NewLine +
-                    "Boulder Tracked: True" + Environment.NewLine +
-                    "<Streamer Mode>" + Environment.NewLine +
-                    "Enable OnScreenLogging: True"
-                    );
                 File.WriteAllText(SettingsFile, SettingsString);
                 posefile = true;
-                poseconsole = false;
-                structfile = true;
-                structconsole = true;
-                discenb = true;
-                ballenb = true;
-                pillenb = true;
-                cubeenb = true;
-                wallenb = true;
-                lgrkenb = true;
-                streamermode = true;
+                structurefile = true;
+                onscreenlog = true;
+                onboardlog = true;
                 MelonLogger.Msg("Default Settings applied");
             }
         }
-        public void WriteToLogFile(string FileName,string Output,bool console,bool file)
+        public void ClearLogFolder()
         {
-            if (console)
-            {
-                MelonLogger.Msg(Output);
-            }
+            foreach (var fi in new DirectoryInfo(BaseFolder + @"\" + ModFolder + @"\" + LogFolder).GetFiles().OrderByDescending(x => x.LastWriteTime).Skip(10))
+                fi.Delete();
+        }
+        public void WriteToLogFile(string FileName,string Output,bool file)
+        {
             if (file)
             {
                 Output += Environment.NewLine;
@@ -499,31 +491,32 @@ namespace PoseLogger
                     //Place Buffer String after delay
                     if ((TimeDiff >= 1500 && PoseName != "Sprint") || (TimeDiff >= 3500 && PoseName == "Sprint"))
                     {
-                        WriteToLogFile(PoseLogFileString, "-----------------------------------------------------", poseconsole, posefile);
-                        if (streamermode)
+                        WriteToLogFile(PoseLogFileString, "-----------------------------------------------------", posefile);
+                        for (int i = 0; i < TBChildren.Length; i++)
                         {
-                            for (int i = 0; i < TBChildren.Length; i++)
-                            {
-                                WriteToBufferList("", BufferList);
-                                WriteToBufferList("", BufferList2);
-                            }
+                            WriteToBufferList("", BufferList);
+                            WriteToBufferList("", BufferList2);
+                        }
+                        if (onscreenlog)
+                        {
                             AddToBuffer(BufferList, 0, 19);
                             AddToBuffer(BufferList2, 20, 39);
-                            LastTime = DateTime.Now;
-                            if(PoseName == "Base Pose") BasePoseReset = true;
                         }
+                        if (onboardlog) UpdateBoard();
+                        LastTime = DateTime.Now;
+                        if(PoseName == "Base Pose") BasePoseReset = true;
                     }
 
                     //Output
                     LogString = "Pose Name: " + PadString(PoseName, 10) + " | Time since last Pose:" + PadString((TimeDiff).ToString("0"), 6) + "ms";
 
-                    if (streamermode && !PoseStructureLink && !PoseName.Contains("Base Pose"))
+                    if (!PoseStructureLink && !PoseName.Contains("Base Pose"))
                     {
                         AddToScreenLogger("Pose struck: " + PoseName);
                     }
 
+                    WriteToLogFile(PoseLogFileString, LogString, posefile);
 
-                    WriteToLogFile(PoseLogFileString, LogString, poseconsole, posefile);
                 }
                 LastTimestamp = Player_Obj.lastPoseUsedTimestamp;
             }
@@ -641,9 +634,9 @@ namespace PoseLogger
                             if (current.LastActive)
                             {
                                 Output = Structure + " spawned.";
-                                WriteToLogFile(StructLogFileString, Output, structconsole, structfile);
+                                WriteToLogFile(StructLogFileString, Output, structurefile);
 
-                                if (PoseStructureLink && streamermode)
+                                if (PoseStructureLink)
                                 {
                                     AddToScreenLogger("Spawned " + current.StructureName);
                                 }
@@ -651,14 +644,14 @@ namespace PoseLogger
                             else
                             {
                                 Output = Structure + " broke.";
-                                WriteToLogFile(StructLogFileString, Output, structconsole, structfile);
+                                WriteToLogFile(StructLogFileString, Output, structurefile);
                             }
                         }
 
                         if (current.LastActive && (current.Timestamp != last.Timestamp || current.MoveName != last.MoveName))
                         {
                             Output = Structure + " affected by " + MoveName;
-                            if (LocalPlayerName == Player && streamermode && !MoveName.Contains("Nothing") && !MoveName.Contains("Spawn Move"))
+                            if (LocalPlayerName == Player && !MoveName.Contains("Nothing") && !MoveName.Contains("Spawn Move"))
                             {
                                 AddToScreenLogger(ComboTracker(current.StructureName, current.MoveName) + " on " + current.StructureName);
                             }
@@ -668,7 +661,7 @@ namespace PoseLogger
                                 Output += "| First Modifier  ";
                                 Output += "| Player: ";
                                 Output += Player;
-                                WriteToLogFile(StructLogFileString,Output,structconsole,structfile);
+                                WriteToLogFile(StructLogFileString,Output,structurefile);
                             }
                             else
                             {
@@ -689,7 +682,7 @@ namespace PoseLogger
                                 }
                                 Output += "| Player: ";
                                 Output += Player;
-                                WriteToLogFile(StructLogFileString,Output, structconsole, structfile);
+                                WriteToLogFile(StructLogFileString,Output, structurefile);
                             }
                         }
                         Tracker[index] = new StructureTracking { StructureName = current.StructureName, LastActive = current.LastActive, Timestamp = current.Timestamp, MoveName = current.MoveName };
@@ -698,14 +691,14 @@ namespace PoseLogger
             }
             catch
             {
-                MelonLogger.Msg("FUCK");
+                MelonLogger.Msg("StructureLogging broke.");
             }
 
         }
 
         public void AddToScreenLogger(string I1)
         {
-            string temp = "";
+            string temp;
             if (BasePoseReset) { LastTime = DateTime.Now; BasePoseReset = false; }
             if (Combo) LastDelay += DateTime.Now - LastTime;
             else LastDelay = DateTime.Now - LastTime;
@@ -717,8 +710,14 @@ namespace PoseLogger
             else WriteToBufferList(I1, BufferList);
             if (Combo) { BufferList2.RemoveAt(BufferList.Count - 1); BufferList2.Add(temp); }
             else WriteToBufferList(temp, BufferList2);
-            AddToBuffer(BufferList, 0, 19);
-            AddToBuffer(BufferList2, 20, 39);
+
+            if (onscreenlog)
+            {
+                AddToBuffer(BufferList, 0, 19);
+                AddToBuffer(BufferList2, 20, 39);
+            }
+            if (onboardlog) UpdateBoard();
+
             LastTime = DateTime.Now;
             Combo = false;
         }
@@ -759,7 +758,7 @@ namespace PoseLogger
                     TBChildren[i].name = "Line" + i.ToString();
                     TBChildren[i].transform.localPosition = new Vector3(-35f, 150f + Offset - Offset * (i + 1), 0);
                     TBChildren[i].transform.GetComponent<RectTransform>().sizeDelta = new Vector2(520f, 28f);
-                    TBChildren[i].transform.GetComponent<TMPro.TextMeshProUGUI>().text = "";
+                    TBChildren[i].transform.GetComponent<TMPro.TextMeshProUGUI>().text = "Initialization Text";
                     TBChildren[i].transform.GetComponent<TMPro.TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
                 }
                 TBChildren[i].transform.localScale = new Vector3(0.6f, 0.5f, 1f);
@@ -791,7 +790,7 @@ namespace PoseLogger
                 TBDelay[i].transform.GetComponent<TMPro.TextMeshProUGUI>().autoSizeTextContainer = false;
             }
             GameObject.Destroy(blank);
-            MelonLogger.Msg("Buffer Object created.");
+            if (debuglogging) MelonLogger.Msg("Buffer Object created.");
             buffer = true;
         }
         public void WriteToBufferList(string Input, List<string> List)
@@ -815,10 +814,9 @@ namespace PoseLogger
                 j++;
             }
         }
-
         public string ComboTracker(string Structure, string Move) 
         {
-            string Output = "";
+            string Output;
             TimeSpan timeSpan = DateTime.Now - ComboTime;
 
             switch (Move)
@@ -850,7 +848,6 @@ namespace PoseLogger
                 MoveBuffer.Add(Move);
                 Output = Move;
                 Combo = false;
-                MelonLogger.Msg("Buffer: " + Move);
             }
             else
             {
@@ -911,11 +908,163 @@ namespace PoseLogger
             return Output;
         }
 
+
+        private GameObject SpawnLeaderBoard(string Name, Vector3 BoardMainPosition, Vector3 BoardMainRotation, bool debuglog)
+        {
+            Vector3 BoardBGOffset = new Vector3(0, 1.175f, 0);
+            Vector3 BoardBGScale = new Vector3(0.95f, 0.6f, 0.2f);
+            Vector3 BoardTxOffsetHead = new Vector3(0, 0.1f, -0.25f);
+            Vector3 BoardTxOffsetBody = new Vector3(0, -0.1f, -0.25f);
+            GameObject Board;
+            GameObject Text;
+
+            GameObject temp = GameObject.Find("--------------LOGIC--------------/Heinhouser products/Leaderboard/Frame");
+            if (debuglog) MelonLogger.Msg(Name + ": Board Object get");
+
+            Board = GameObject.Instantiate(temp);
+            if (debuglog) MelonLogger.Msg(Name + ": Board Object instantiate");
+
+            Board.transform.position = BoardMainPosition;
+            Board.transform.eulerAngles = BoardMainRotation;
+            if (debuglog) MelonLogger.Msg(Name + ": Position changed");
+
+            Board.name = Name;
+            Board.transform.GetChild(0).name = "TopLog";
+            Board.transform.GetChild(2).name = "FootLeft";
+            Board.transform.GetChild(3).name = "FootRight";
+            Board.transform.GetChild(4).name = "LogLeft";
+            Board.transform.GetChild(5).name = "LogRight";
+            Board.transform.GetChild(6).name = "InnerWall";
+            Board.transform.GetChild(11).name = "LogBigTop";
+            Board.transform.GetChild(12).name = "BackPlane";
+            if (debuglog) MelonLogger.Msg(Name + ": Objects renamed");
+
+            Board.transform.GetChild(6).localPosition = BoardBGOffset;
+            Board.transform.GetChild(6).localScale = BoardBGScale;
+            if (debuglog) MelonLogger.Msg(Name + ": Frame resized");
+
+            temp = GameObject.Find("--------------LOGIC--------------/Heinhouser products/Leaderboard/Text Objects/Titleplate/Leaderboard");
+            if (debuglog) MelonLogger.Msg(Name + ": Sample Text Object get");
+
+            for(int i = 0; i < 4; i++)
+            {
+                Text = new GameObject { name = "Text" + i.ToString() };
+                Text.transform.SetParent(Board.transform.GetChild(6));
+                if (debuglog) MelonLogger.Msg(Name + ": Text Object " + i.ToString() + " created");
+                if(i <= 1) { Text.transform.localPosition = BoardTxOffsetHead; }
+                else { Text.transform.localPosition = BoardTxOffsetBody; }
+                Text.transform.localScale = Invert_Values(BoardBGScale);
+                Text.transform.eulerAngles = BoardMainRotation;
+                Text.AddComponent<TextMeshPro>();
+                Text.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(1, 1);
+                if (debuglog) MelonLogger.Msg(Name + ": Text created and transformed");
+
+                Text.transform.GetComponent<TextMeshPro>().text = "Initialization Text";
+                Text.transform.GetComponent<TextMeshPro>().fontSize = 0.6f;
+                Text.transform.GetComponent<TextMeshPro>().font = temp.GetComponent<TextMeshPro>().font;
+                Text.transform.GetComponent<TextMeshPro>().fontMaterial = temp.GetComponent<TextMeshPro>().fontMaterial;
+
+                switch (i)
+                {
+                    case 0:
+                        Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.TopLeft;
+                        break;
+                    case 1:
+                        Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.TopRight;
+                        break;
+                    case 2:
+                        Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.BottomLeft;
+                        break;
+                    case 3:
+                        Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.BottomRight;
+                        break;
+                }
+                    
+                if (debuglog) MelonLogger.Msg(Name + ": Text Object " + i.ToString() + " set");
+            }
+
+            GameObject.Destroy(Board.transform.GetChild(1).gameObject);
+            GameObject.Destroy(Board.transform.GetChild(7).gameObject);
+            GameObject.Destroy(Board.transform.GetChild(8).gameObject);
+            GameObject.Destroy(Board.transform.GetChild(9).gameObject);
+            GameObject.Destroy(Board.transform.GetChild(10).gameObject);
+            if (debuglog) MelonLogger.Msg(Name + ": Children destroyed");
+            return Board;
+        }
+        private void SetTextOnBoard(GameObject Board,int TextNumber,string Output)
+        {
+            Board.transform.FindChild("InnerWall").GetChild(TextNumber).GetComponent<TextMeshPro>().text = Output;
+        }
+        private void UpdateBoard()
+        {
+            string Head1;
+            string Head2;
+            string Body1 = "";
+            string Body2 = "";
+
+            Head1 = 
+                BufferList[0];
+            Head2 = 
+                BufferList2[0];
+            for (int i = 3;i < 20; i++)
+            {
+                if (i != 19)
+                {
+                    Body1 += BufferList[i] + Environment.NewLine;
+                }
+                else
+                {
+                    Body1 += BufferList[i];
+                }
+            }
+            for (int i = 3; i < 20; i++)
+            {
+                if (i != 19)
+                {
+                    Body2 += BufferList2[i] + Environment.NewLine;
+                }
+                else
+                {
+                    Body2 += BufferList2[i];
+                }
+            }
+            if (debuglogging) MelonLogger.Msg("Text Blocks created");
+
+
+            //Board at Howard
+            if (currentScene == "Gym")
+            {
+                SetTextOnBoard(Board_Howard, 0, Head1);
+                SetTextOnBoard(Board_Howard, 1, Head2);
+                SetTextOnBoard(Board_Howard, 2, Body1);
+                SetTextOnBoard(Board_Howard, 3, Body2);
+                if (debuglogging) MelonLogger.Msg("Text pushed to Howard Board");
+            }
+
+            //Training Area Board
+            SetTextOnBoard(Board_Training, 0, Head1);
+            SetTextOnBoard(Board_Training, 1, Head2);
+            SetTextOnBoard(Board_Training, 2, Body1);
+            SetTextOnBoard(Board_Training, 3, Body2);
+            if (debuglogging) MelonLogger.Msg("Text pushed to Training Board");
+
+        }
+        private Vector3 Invert_Values(Vector3 Input)
+        {
+            Vector3 temp;
+
+            temp.x = 1 / Input.x;
+            temp.y = 1 / Input.y;
+            temp.z = 1 / Input.z;
+
+            return temp;
+        }
+
         //Overrides
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
-            init = false;
+            SceneInit = false;
             currentScene = sceneName;
         }
 
