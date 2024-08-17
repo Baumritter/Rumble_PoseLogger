@@ -4,17 +4,20 @@ using System.Runtime.InteropServices;
 using MelonLoader;
 using PoseLogger; // The namespace of your mod class
 // ...
-[assembly: MelonInfo(typeof(PoseLoggerClass), "PoseLogger", "1.3.0", "Baumritter")]
+[assembly: MelonInfo(typeof(PoseLoggerClass), PoseLogger.BuildInfo.ModName, PoseLogger.BuildInfo.ModVersion, PoseLogger.BuildInfo.Author)]
 [assembly: MelonGame("Buckethead Entertainment", "RUMBLE")]
+[assembly: VerifyLoaderVersion(0, 6, 2, true)]
+[assembly: MelonColor(200, 0, 200, 0)]
+[assembly: MelonAuthorColor(200, 0, 200, 0)]
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PoseLogger")]
+[assembly: AssemblyTitle(PoseLogger.BuildInfo.ModName)]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PoseLogger")]
+[assembly: AssemblyProduct(PoseLogger.BuildInfo.ModName)]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -37,5 +40,5 @@ using PoseLogger; // The namespace of your mod class
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion(PoseLogger.BuildInfo.ModVersion)]
+[assembly: AssemblyFileVersion(PoseLogger.BuildInfo.ModVersion)]
