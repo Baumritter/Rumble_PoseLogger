@@ -24,14 +24,12 @@ namespace PoseLogger
             Left,
             Right
         }
-        public static void Pad(this string str, PaddingMode PaddingMode, int StringLength)
+        public static string Pad(this string str, PaddingMode PaddingMode, int StringLength)
         {
             if (str.Length > StringLength) throw new ArgumentException("Padding not possible: Input Length > Pad Length");
 
             string Pad = "";
             int PadLength = StringLength - str.Length;
-
-            if (PadLength > 0) return;
 
             for (int i = 0; i < PadLength; i++)
             {
@@ -42,6 +40,8 @@ namespace PoseLogger
                 str = Pad + str;
             else
                 str = str + Pad;
+
+            return str;
         }
     }
     public static class ListExtension

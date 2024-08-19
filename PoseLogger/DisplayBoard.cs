@@ -90,7 +90,7 @@ namespace PoseLogger
                 {
                     case 0:
                         Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.TopLeft;
-                        Text.transform.GetComponent<TextMeshPro>().text = "Pose/Structure Tracker";
+                        Text.transform.GetComponent<TextMeshPro>().text = "Move Tracker";
                         break;
                     case 1:
                         Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.TopRight;
@@ -98,11 +98,11 @@ namespace PoseLogger
                         break; 
                     case 2:
                         Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.BottomLeft;
-                        Text.transform.GetComponent<TextMeshPro>().text = "Initialization Text";
+                        Text.transform.GetComponent<TextMeshPro>().text = "This is a text";
                         break;
                     case 3:
                         Text.transform.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.BottomRight;
-                        Text.transform.GetComponent<TextMeshPro>().text = "Initialization Text";
+                        Text.transform.GetComponent<TextMeshPro>().text = "This is a text";
                         break;
                 }
 

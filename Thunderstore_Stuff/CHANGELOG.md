@@ -1,3 +1,10 @@
+# Version 2.0.0
+- Updated to MelonLoader 0.6.+
+- Reworked the entirety of the code and refactored most functionalities
+	- Tracking Solution is no longer attrocious on frame rate
+- Optional Multi Person tracking included (Combo Tracking will break when using that)
+- Added ModUI integration
+- Added Error log for things that have not been debugged already
 # Version 1.3.0
 - Added BoardLogging
 - Added "physical" Board objects in 3 postions:

@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\displayboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|solutionrelative:displayboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|g:\\01_rumble\\10_mods\\rumble_poselogger\\poselogger\\poselogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|solutionrelative:poselogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\properties\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|solutionrelative:properties\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|g:\\01_rumble\\10_mods\\rumble_poselogger\\poselogger\\displayboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|solutionrelative:displayboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|g:\\01_rumble\\10_mods\\rumble_poselogger\\poselogger\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7563B7CA-EBE1-428E-8669-99F62CBF56AB}|PoseLogger.csproj|solutionrelative:extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,41 +26,41 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "AssemblyInfo.cs",
-              "DocumentMoniker": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\Properties\\AssemblyInfo.cs",
-              "RelativeDocumentMoniker": "Properties\\AssemblyInfo.cs",
-              "ToolTip": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\Properties\\AssemblyInfo.cs",
-              "RelativeToolTip": "Properties\\AssemblyInfo.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAmAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-16T15:30:13.745Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "PoseLogger.cs",
-              "DocumentMoniker": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\PoseLogger.cs",
-              "RelativeDocumentMoniker": "PoseLogger.cs",
-              "ToolTip": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\PoseLogger.cs",
-              "RelativeToolTip": "PoseLogger.cs",
-              "ViewState": "AQIAAJsAAAAAAAAAAAAswKMBAAAJAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-14T10:47:50.471Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "DisplayBoard.cs",
               "DocumentMoniker": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\DisplayBoard.cs",
               "RelativeDocumentMoniker": "DisplayBoard.cs",
               "ToolTip": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\DisplayBoard.cs",
               "RelativeToolTip": "DisplayBoard.cs",
-              "ViewState": "AQIAABwAAAAAAAAAAAAYwJwAAABeAAAA",
+              "ViewState": "AQIAAEgAAAAAAAAAAAAiwGwAAABTAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-13T20:50:23.405Z",
+              "WhenOpened": "2024-08-19T17:38:06.533Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Extensions.cs",
+              "DocumentMoniker": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\Extensions.cs",
+              "RelativeDocumentMoniker": "Extensions.cs",
+              "ToolTip": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\Extensions.cs",
+              "RelativeToolTip": "Extensions.cs",
+              "ViewState": "AQIAABwAAAAAAAAAAAAuwCUAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-19T16:22:59.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PoseLogger.cs",
+              "DocumentMoniker": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\PoseLogger.cs",
+              "RelativeDocumentMoniker": "PoseLogger.cs",
+              "ToolTip": "G:\\01_Rumble\\10_Mods\\Rumble_PoseLogger\\PoseLogger\\PoseLogger.cs",
+              "RelativeToolTip": "PoseLogger.cs",
+              "ViewState": "AQIAAIwAAAAAAAAAAAAQwCQBAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-14T10:47:50.471Z",
               "EditorCaption": ""
             }
           ]
